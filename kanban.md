@@ -1,6 +1,32 @@
 ## 進行中 (In Progress)
 
 ## 待測試 (Ready for Testing)
+- [ ] 測試卡片 2 `section-title` (5cqw) 與 `section-desc` (4cqw) 放大效果，以及與上方區塊間距縮減後之緊湊排版
+- [ ] 測試頂底飾條標語 `strip-banner-text` 字級 3.5cqw、字距 0.5cqw，以及紫綠文字陰影帶模糊柔光（blur）之視覺效果
+- [ ] 測試 `--font-title` 替換為 `Noto Serif TC`（思源宋體/明體 700/900），檢視頂底飾條標語、警示膠帶與標題之視覺張力與排版風格
+- [ ] 測試社群按鈕依照 links.txt 順序排列（第一排：Threads, Instagram, YouTube, Plurk；第二排：GitHub, BandLab, Scratch, Tetrio）
+- [ ] 測試 Threads 按鈕常駐顯示，且有 `#c` 時連結為 `https://www.threads.com/@mcslg2`、無 `#c` 時為 `https://www.threads.com/@sjw_is_sujiwi`
+- [ ] 測試社群按鈕與信箱全面改用 `icon/` 目錄圖檔（threads, instagram, youtube, scratch, github, plurk, bandlab, tetr, gmail）
+- [ ] 測試移除 LinkedIn 圖標按鈕後的第二排按鈕排列視覺效果
+- [ ] 測試 INTP 字級改為 3.5cqw 與 Bungee 字體之視覺大小
+- [ ] 測試 INTP 與 Email 信箱框在該行完全向右對齊（justify-content: space-between）
+- [ ] 測試分隔線（.info-divider）在上方個資群組與下方自介四段話之間均勻垂直置中（margin: auto 0）
+- [ ] 測試頭像外框無圓角（直角化）視覺呈現，以及四周邊距縮減後圖片放大（32.5cqw × 41.5cqw）之緊湊度與對齊
+- [ ] 測試 Rrequin (5cqw)、MCSLG (9cqw)、右上角社群按鈕 (6cqw × 6cqw) 放大視覺效果
+- [ ] 測試 TW/TPE 徽章在該行相對於 SUJIWI 垂直置中（align-items: center）
+- [ ] 測試自動年齡計算基準日更新為 2008/11/27（符合民國97年次）
+- [ ] 測試自介說明文字 `.trait-item` 字級改為 `3.3cqw` 後的視覺份量感與行高舒適度
+- [ ] 測試右側說明文字底緣（自介第四段底緣）精準水平切齊左側頭像框（avatar-frame）底緣，Rrequin 標籤獨立落於該基準線下方
+- [ ] 測試頭像設定為 30cqw × 40cqw、Rrequin 設為 3cqw，且整體視覺比例均衡無撐破卡片現象
+- [ ] 測試修正頭貼與標籤總高度（由 42.5cqw 調降至 36cqw），驗證底部黃條未被撐出卡片外且文字垂直完美置中
+- [ ] 測試底部飾條「這是鯊魚的時代」與頂部「這是海豚的時代」幾何垂直置中效果（消除中文字形基線偏下與 padding 不均問題）
+- [ ] 測試底部飾條「這是鯊魚的時代」防裁切安全邊距與文字陰影完整顯示（確認右下圓角處未被截斷）
+- [ ] 測試自介四段話、生日、INTP、Email 與卡片2 理念夢想文字調大後之清晰易讀性與視覺比例
+- [ ] 測試卡片內部排版飽滿度（頭像框、文字、按鈕與上下黃色飾條放大後，於信用卡比例下填滿卡片、無大片突兀留白）
+- [ ] 測試卡片全元件與字體等比例自適應縮放（使用 Container Query `cqw`，卡片維持標準信用卡比例 85.6:54，放大縮小不失衡跑版）
+- [ ] 測試風格 B 官方全彩 Logo 視覺效果與右上角雙排排列
+- [ ] 測試卡片上下黃條文字完整度（確認裁切截斷問題已徹底解決）
+- [ ] 測試頂部雙層交錯微斜施工警示膠帶動態與原稿還原度
 - [ ] 測試 Figma 風格還原與互動雙卡片（滾動堆疊/左右展開、#c 條件解鎖 Threads 與喜歡福瑞、背景海豚視差游動）
 - [ ] 驗證遠端倉庫 (`https://github.com/Mcslg/mcslg.github.io.git`) 主分支推送狀態
 - [ ] 待使用者至 GitHub 設定 Pages 後驗證根網址 (`https://mcslg.github.io/`) 存取
