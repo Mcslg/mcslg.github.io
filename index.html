@@ -33,6 +33,10 @@
       padding: 0;
     }
 
+    html {
+      overflow-x: hidden;
+    }
+
     body {
       background-color: var(--bg);
       color: #000000;
@@ -134,7 +138,7 @@
       padding: 0 30px;
     }
 
-    /* 雙卡片展示舞台（Scroll Stack to Side-by-Side） */
+    /* 雙卡片展示舞台：卡片1在左上、卡片2在右下，對角聚合動態 */
     .cards-stage {
       min-height: 80vh;
       display: flex;
@@ -143,49 +147,131 @@
       justify-content: center;
       position: relative;
       margin-bottom: 60px;
+      padding-top: 40px; /* 保留頂部安全緩衝，防止卡片撞到上方施工膠帶 */
     }
 
     .cards-container {
       width: 100%;
+      max-width: 900px;
       display: flex;
-      justify-content: center;
-      align-items: flex-start;
-      gap: 36px;
+      flex-direction: column;
+      align-items: center;
+      gap: 30px;
       position: relative;
-      transition: all 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+      padding: 40px 0;
+      --p: 0; /* 預設 0 */
     }
 
-    /* 未滑入時：堆疊態 (stacked) */
-    .cards-container.stacked .card-main-wrapper {
-      transform: translateX(120px) rotate(-4.5deg);
+    /* 雙卡片進場飛入軌道 (Scroll-triggered Fly-in Tracks) */
+    .card-fly-track {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    /* 卡片 1 軌道：左外側進場 (-100vw)，預設 z-index 在前 */
+    .card-fly-left {
+      align-items: flex-start;
+      z-index: 30;
+      transform: translateX(-100vw);
+      opacity: 0;
+      transition: transform 0.95s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.6s ease-out;
+      will-change: transform, opacity;
+    }
+
+    /* 卡片 2 軌道：右外側進場 (100vw)，交錯延遲 0.18s，預設 z-index 在後 */
+    .card-fly-right {
+      align-items: flex-end;
       z-index: 10;
+      transform: translateX(100vw);
+      opacity: 0;
+      transition: transform 0.95s cubic-bezier(0.16, 1, 0.3, 1) 0.18s, opacity 0.6s ease-out 0.18s;
+      will-change: transform, opacity;
     }
 
-    .cards-container.stacked .card-secondary {
-      transform: translateX(-120px) translateY(70px) rotate(3.5deg);
-      z-index: 20;
+    /* 當滾動至該區塊時觸發進場：飛入歸位 */
+    .cards-container.in-view .card-fly-left,
+    .cards-container.in-view .card-fly-right {
+      transform: translateX(0);
+      opacity: 1;
     }
 
-    /* 滑入焦點後：展開左右並排 (unfolded) */
-    .cards-container.unfolded .card-main-wrapper {
-      transform: translateX(0) translateY(0) rotate(0deg);
-      z-index: 10;
-    }
-
-    .cards-container.unfolded .card-secondary {
-      transform: translateX(0) translateY(0) rotate(0deg);
-      z-index: 10;
-    }
-
-    /* 卡片 1 外層包裹（包含下方的備註文字） */
+    /* 卡片 1（左上角起跑，降低初始高度防止撞頂，平滑向右下聚合） */
     .card-main-wrapper {
       width: 100%;
-      max-width: 914px;
+      max-width: 820px;
       display: flex;
       flex-direction: column;
       gap: 14px;
-      transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+      align-self: flex-start; /* 靠左上 */
+      position: relative;
+      /* 起點 (-130px, -40px)，隨 --p 往右下滑行 260px / 160px 平滑聚合 */
+      transform: translateX(calc(-130px + var(--p, 0) * 260px)) translateY(calc(-40px + var(--p, 0) * 160px)) rotate(calc(-5deg + var(--p, 0) * 3deg));
+      transition: transform 0.1s ease-out;
+      will-change: transform;
+      z-index: 30; /* 預設卡片 1 絕對在前 */
     }
+
+    /* 卡片 2（右下角起跑，隨滾動平滑往左上聚合） */
+    .card-secondary {
+      width: 100%;
+      max-width: 780px;
+      aspect-ratio: 85.6 / 54;
+      background: var(--card-green);
+      border: clamp(3px, 0.8cqw, 6.6px) solid var(--border);
+      border-radius: clamp(8px, 1.8cqw, 14px);
+      box-shadow: var(--shadow-neo);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      align-self: flex-end; /* 靠右下 */
+      position: relative;
+      /* 起點 (130px, 80px)，隨 --p 往左上滑行 260px / 160px 平滑聚合 */
+      transform: translateX(calc(130px - var(--p, 0) * 260px)) translateY(calc(80px - var(--p, 0) * 160px)) rotate(calc(4deg - var(--p, 0) * 2.5deg));
+      transition: transform 0.1s ease-out;
+      will-change: transform;
+      z-index: 10; /* 預設卡片 2 在後 */
+    }
+
+    /* 聚合後期（--p 趨近 1 時）：卡片 2 翻轉在前（軌道與卡片皆提權） */
+    .cards-container.p-converged .card-fly-left,
+    .cards-container.p-converged .card-main-wrapper {
+      z-index: 10;
+    }
+    .cards-container.p-converged .card-fly-right,
+    .cards-container.p-converged .card-secondary {
+      z-index: 30;
+    }
+
+    /* 滑鼠懸停時強制最前：平滑回正、微幅浮起並置頂（軌道與卡片皆置頂） */
+    .card-fly-left:hover,
+    .card-fly-right:hover {
+      z-index: 99 !important;
+    }
+
+    .card-main-wrapper:hover {
+      transform: translateX(calc(-130px + var(--p, 0) * 260px)) translateY(calc(-40px + var(--p, 0) * 160px - 8px)) rotate(0deg) scale(1.015) !important;
+      transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1) !important;
+      z-index: 99 !important;
+    }
+
+    .card-secondary:hover {
+      transform: translateX(calc(130px - var(--p, 0) * 260px)) translateY(calc(80px - var(--p, 0) * 160px - 8px)) rotate(0deg) scale(1.015) !important;
+      transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1) !important;
+      z-index: 99 !important;
+    }
+
+    /* 無障礙支援：減少動態效果偏好 */
+    @media (prefers-reduced-motion: reduce) {
+      .card-fly-left,
+      .card-fly-right {
+        transform: none !important;
+        opacity: 1 !important;
+        transition: none !important;
+      }
+    }
+
 
     /* 卡片 1 主體（信用卡比例 ISO 7810 ID-1：85.6 × 54mm，啟用 Container Query） */
     .card-main {
@@ -634,13 +720,15 @@
     <section class="cards-stage" id="cardsStage">
       <div class="cards-container stacked" id="cardsContainer">
         
-        <!-- 卡片 1 包裹（含下方備註） -->
-        <div class="card-main-wrapper">
-          <article class="card-main">
-            <!-- 頂部飾條：絕不裁切文字 -->
-            <div class="card-strip">
-              <span class="strip-banner-text">這是海豚的時代</span>
-            </div>
+        <!-- 卡片 1：左飛入軌道 -->
+        <div class="card-fly-track card-fly-left">
+          <!-- 卡片 1 包裹（含下方備註） -->
+          <div class="card-main-wrapper">
+            <article class="card-main">
+              <!-- 頂部飾條：絕不裁切文字 -->
+              <div class="card-strip">
+                <span class="strip-banner-text">這是海豚的時代</span>
+              </div>
 
             <div class="card-body-main">
               <!-- 左側頭像欄 -->
@@ -738,10 +826,12 @@
           <div class="main-notice-text">
             備註：近期準備學測，1月以後產出應該會多很多！
           </div>
-        </div>
+        </div><!-- /.card-main-wrapper -->
+        </div><!-- /.card-fly-left -->
 
-        <!-- 卡片 2：個人理念與未來夢想 -->
-        <article class="card-secondary">
+        <!-- 卡片 2：右飛入軌道 -->
+        <div class="card-fly-track card-fly-right">
+          <article class="card-secondary">
           <div class="card-strip">
             <span class="strip-banner-text">個人理念 & 未來夢想</span>
           </div>
@@ -762,6 +852,7 @@
             <span class="strip-banner-text">2026 ROADMAP</span>
           </div>
         </article>
+        </div><!-- /.card-fly-right -->
 
       </div>
     </section>
@@ -835,23 +926,50 @@
     window.addEventListener('load', checkSecretHash);
     window.addEventListener('hashchange', checkSecretHash);
 
-    // 2. 雙卡片滾動展開效果 (Scroll Stack to Unfolded)
+    // 2. 雙卡片滾動平滑連續聚合效果 (Scroll-driven Convergence)
     const cardsStage = document.getElementById('cardsStage');
     const cardsContainer = document.getElementById('cardsContainer');
 
     function handleCardsScroll() {
       if (!cardsStage || !cardsContainer) return;
-      const rect = cardsStage.getBoundingClientRect();
-      const windowHeight = window.innerHeight;
+      
+      const scrollY = window.scrollY || window.pageYOffset;
+      // 滾動觸發行程：向下滑動 0px 到 400px 之間，p 平滑從 0 變為 1
+      const maxScrollDist = 400;
+      
+      let p = scrollY / maxScrollDist;
+      p = Math.min(Math.max(p, 0), 1); // 頂部 scrollY=0 時，p 絕對嚴格等於 0
 
-      // 當進入焦點區時展開，離開後堆疊
-      if (rect.top <= windowHeight * 0.45 && rect.bottom >= windowHeight * 0.25) {
-        cardsContainer.classList.remove('stacked');
-        cardsContainer.classList.add('unfolded');
+      // 連續更新 CSS 變數 --p
+      cardsContainer.style.setProperty('--p', p.toFixed(3));
+
+      // 預設卡片1在前；聚合後期 (p >= 0.7) 卡片2翻轉在前
+      if (p >= 0.7) {
+        cardsContainer.classList.add('p-converged');
       } else {
-        cardsContainer.classList.add('stacked');
-        cardsContainer.classList.remove('unfolded');
+        cardsContainer.classList.remove('p-converged');
       }
+    }
+
+    // 初始載入時立即執行一次，確保初始狀態為 p = 0
+    handleCardsScroll();
+
+    // 2b. 雙卡片進場飛入觸發（IntersectionObserver：滾動至卡片區塊時觸發飛入）
+    if (cardsContainer) {
+      const flyObserver = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              cardsContainer.classList.add('in-view');
+              flyObserver.disconnect(); // 觸發一次後即不再監聽
+            }
+          });
+        },
+        {
+          threshold: 0.05, // 卡片區塊有 5% 進入視野即觸發
+        }
+      );
+      flyObserver.observe(cardsContainer);
     }
 
     // 3. 背景海豚左右視差滾動效果
