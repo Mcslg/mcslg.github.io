@@ -6,6 +6,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Mcslg | 這裡仍在架構中🐬</title>
 
+  <!-- 網站圖標 (Favicon) -->
+  <link rel="icon" type="image/png" href="assets/favicon.png">
+  <link rel="apple-touch-icon" href="assets/favicon.png">
+
   <!-- 引入 Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -763,7 +767,7 @@
       line-height: 1.45;
     }
 
-    /* #c 隱私控制：Threads 與「喜歡福瑞」 */
+    /* #c 與 #d 隱私控制：Threads 與「喜歡毛毛」 */
     .secret-item {
       display: none !important;
     }
@@ -856,8 +860,8 @@
       opacity: 0;
       transform: translateY(28px) scale(0.96) rotate(0deg);
       transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1),
-                  transform 0.7s cubic-bezier(0.16, 1, 0.3, 1),
-                  box-shadow 0.25s ease;
+        transform 0.7s cubic-bezier(0.16, 1, 0.3, 1),
+        box-shadow 0.25s ease;
       cursor: default;
     }
 
@@ -923,8 +927,8 @@
       opacity: 0;
       transform: translateY(40px) scale(0.88) rotate(0deg);
       transition: opacity 0.75s cubic-bezier(0.16, 1, 0.3, 1),
-                  transform 0.75s cubic-bezier(0.16, 1, 0.3, 1),
-                  box-shadow 0.25s ease;
+        transform 0.75s cubic-bezier(0.16, 1, 0.3, 1),
+        box-shadow 0.25s ease;
     }
 
     /* 展開後的各自微傾斜（在 in-view 時觸發） */
@@ -1141,14 +1145,15 @@
     }
 
     /* 
-      #c 模式下，主頁層上方加入正好 100vh 的外距 (margin-top: 100vh)，
+      #c 模式下（有 show-card），主頁層上方加入正好 100vh 的外距 (margin-top: 100vh)，
       讓第一屏 100% 完整留給底層名片，向下滑動時主頁層才帶著陰影向上覆蓋上來！
+      #d 模式則無 show-card，直接展示主頁層。
     */
-    body.show-secret .main-page-layer {
+    body.show-card .main-page-layer {
       margin-top: 100vh;
     }
 
-    body.show-secret .folded-card-hero {
+    body.show-card .folded-card-hero {
       display: flex;
     }
 
@@ -2007,7 +2012,7 @@
                       <p class="trait-item trait-cyan">亂畫圖·亂編曲·亂拍片·亂vibe code</p>
                       <p class="trait-item trait-cyan-light">我愛海豚君也只愛海豚君</p>
                       <p class="trait-item trait-purple">
-                        喜歡理科，喜歡創作，喜歡鳥<span class="secret-item">，喜歡福瑞</span>
+                        喜歡理科，喜歡創作，喜歡鳥<span class="secret-item">，喜歡毛毛</span>
                       </p>
                       <p class="trait-item trait-purple-light">討厭語文，討厭adobe</p>
                     </div>
@@ -2037,7 +2042,7 @@
               <div class="card-body-secondary">
                 <div>
                   <h2 class="section-title">個人理念</h2>
-                  <p class="section-desc">我喜歡學習新東西！雖然有點三分鐘熱度或是不太專精，但我就是喜歡知識衝擊大腦的感覺。我希望我不會太在意流量，但很顯然沒有流量也沒用。</p>
+                  <p class="section-desc">我喜歡學習新東西！雖然有點三分鐘熱度或是不太專精，但我就是喜歡知識衝擊大腦的感覺。我希望我不會太在意流量，希望啦。</p>
                 </div>
 
                 <div>
@@ -2274,10 +2279,20 @@
       const threadsBtn = document.getElementById('threadsBtn');
       const bookWrapper = document.getElementById('cardBookWrapper');
 
-      if (hash.includes('#c')) {
+      const isC = hash.includes('#c');
+      const isD = hash.includes('#d');
+      const isSecret = isC || isD;
+
+      if (isSecret) {
         document.body.classList.add('show-secret');
         if (threadsBtn) threadsBtn.href = 'https://www.threads.com/@mcslg2';
+      } else {
+        document.body.classList.remove('show-secret');
+        if (threadsBtn) threadsBtn.href = 'https://www.threads.com/@sjw_is_sujiwi';
+      }
 
+      if (isC) {
+        document.body.classList.add('show-card');
         if (bookWrapper) {
           bookWrapper.classList.remove('is-unfolded');
 
@@ -2291,8 +2306,7 @@
           }
         }
       } else {
-        document.body.classList.remove('show-secret');
-        if (threadsBtn) threadsBtn.href = 'https://www.threads.com/@sjw_is_sujiwi';
+        document.body.classList.remove('show-card');
         if (bookWrapper) bookWrapper.classList.remove('is-unfolded');
       }
     }
@@ -2307,12 +2321,12 @@
       if (!cardsStage || !cardsContainer) return;
 
       const scrollY = window.scrollY || window.pageYOffset;
-      const isSecret = document.body.classList.contains('show-secret');
+      const hasCard = document.body.classList.contains('show-card');
       const foldedHero = document.getElementById('foldedCardHero');
 
-      // 若在 #c 模式下，名片展區高度為 100vh (sticky 停駐)
+      // 若在 #c 模式下（有名片展區），名片展區高度為 100vh (sticky 停駐)
       // 當使用者滾動名片區時，對名片給予微幅 scale 與暗化視差
-      if (isSecret && foldedHero) {
+      if (hasCard && foldedHero) {
         const heroHeight = foldedHero.offsetHeight || window.innerHeight;
         const heroScrollP = Math.min(Math.max(scrollY / heroHeight, 0), 1);
         const cardScale = 1 - heroScrollP * 0.08; // 微微縮小至 0.92
@@ -2332,7 +2346,7 @@
       // 無 #c 時以 scrollY 為準 (0 ~ 400px)
       // 有 #c 時以進入 mainPageLayer 後的滾動量為準
       let relativeScroll = scrollY;
-      if (isSecret && foldedHero) {
+      if (hasCard && foldedHero) {
         const heroHeight = foldedHero.offsetHeight || window.innerHeight;
         relativeScroll = Math.max(scrollY - heroHeight, 0);
       }
