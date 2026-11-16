@@ -1,0 +1,989 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>街機選角模式示範 // CHARACTER SELECT ARCADE</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Noto+Sans+TC:wght@400;700;900&family=Noto+Serif+TC:wght@700;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #12131a;
+      --yellow: #FFCA18;
+      --blue: #00A8F3;
+      --purple: #B83DBA;
+      --lime: #C4FF0E;
+      --dark-card: #1e1f2b;
+      --font-bungee: 'Bungee', cursive, sans-serif;
+      --font-title: 'Noto Serif TC', serif;
+      --font-main: 'Noto Sans TC', -apple-system, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: #ffffff;
+      font-family: var(--font-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      padding: 30px 16px 60px;
+      background-image: 
+        radial-gradient(circle at 15% 15%, rgba(196, 255, 14, 0.08) 0%, transparent 40%),
+        radial-gradient(circle at 85% 85%, rgba(184, 61, 186, 0.12) 0%, transparent 45%);
+    }
+
+    .demo-container {
+      width: 100%;
+      max-width: 980px;
+    }
+
+    /* 頂部標頭與說明 */
+    .demo-header {
+      margin-bottom: 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .demo-badge {
+      display: inline-block;
+      background: var(--yellow);
+      color: #000000;
+      font-family: var(--font-bungee);
+      font-size: 0.85rem;
+      padding: 4px 12px;
+      border: 3px solid #000000;
+      box-shadow: 3px 3px 0px #000000;
+      margin-bottom: 8px;
+    }
+
+    .demo-title {
+      font-family: var(--font-title);
+      font-size: clamp(1.6rem, 4vw, 2.2rem);
+      font-weight: 900;
+      color: #ffffff;
+      text-shadow: 3px 3px 0px #000000;
+    }
+
+    .demo-hint {
+      font-size: 0.9rem;
+      color: #aaaaaa;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1.5px solid rgba(255, 255, 255, 0.15);
+      border-radius: 8px;
+      padding: 6px 12px;
+    }
+
+    .demo-hint kbd {
+      background: #33333e;
+      border: 1px solid #555566;
+      border-radius: 4px;
+      padding: 2px 6px;
+      font-family: var(--font-bungee);
+      font-size: 0.8rem;
+      color: var(--yellow);
+    }
+
+    /* 街機主外框（萊姆綠底板風格） */
+    .arcade-cabinet {
+      background: var(--lime);
+      border: 6px solid #000000;
+      border-radius: 20px;
+      box-shadow: 10px 10px 0px #000000;
+      padding: clamp(20px, 3.5vw, 36px);
+      position: relative;
+    }
+
+    /* 機台頂部控制列 */
+    .arcade-top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .arcade-player-tag {
+      background: var(--purple);
+      color: #ffffff;
+      border: 3.5px solid #000000;
+      padding: 6px 16px;
+      border-radius: 8px;
+      font-family: var(--font-bungee);
+      font-size: 0.95rem;
+      box-shadow: 3px 3px 0px #000000;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .arcade-player-tag .pulse-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--yellow);
+      display: inline-block;
+      animation: arcadePulse 1s infinite alternate;
+    }
+
+    @keyframes arcadePulse {
+      0% { opacity: 0.4; transform: scale(0.85); }
+      100% { opacity: 1; transform: scale(1.2); }
+    }
+
+    .arcade-slot-counter {
+      background: #000000;
+      color: var(--lime);
+      font-family: var(--font-bungee);
+      font-size: 1.1rem;
+      padding: 6px 16px;
+      border-radius: 8px;
+      border: 3.5px solid #000000;
+      letter-spacing: 0.1em;
+    }
+
+    /* 角色舞台區（雙欄佈局） */
+    .arcade-stage {
+      background: #ffffff;
+      border: 5px solid #000000;
+      border-radius: 16px;
+      box-shadow: 7px 7px 0px #000000;
+      padding: clamp(18px, 3vw, 28px);
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      gap: 28px;
+      position: relative;
+      min-height: 380px;
+      margin-bottom: 26px;
+    }
+
+    @media (max-width: 768px) {
+      .arcade-stage {
+        grid-template-columns: 1fr;
+        gap: 20px;
+      }
+    }
+
+    /* 左側立繪外框 */
+    .arcade-visual-col {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .arcade-visual-box {
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      max-width: 280px;
+      background: #f4f6f8;
+      border: 4px solid #000000;
+      border-radius: 12px;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 4px 4px 0px rgba(0, 0, 0, 0.2);
+      overflow: hidden;
+      background-image: radial-gradient(#000000 12%, transparent 12%);
+      background-size: 14px 14px;
+      background-color: #fafbfc;
+    }
+
+    .arcade-char-img {
+      max-width: 82%;
+      max-height: 82%;
+      object-fit: contain;
+      filter: drop-shadow(4px 6px 0px rgba(0, 0, 0, 0.18));
+      transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s ease;
+    }
+
+    .arcade-visual-box.switching .arcade-char-img {
+      transform: scale(0.7) translateY(20px);
+      opacity: 0;
+    }
+
+    .arcade-visual-box.popping .arcade-char-img {
+      transform: scale(1.08);
+    }
+
+    .locked-silhouette {
+      font-size: 5rem;
+      font-weight: 900;
+      color: #bbbbbb;
+      font-family: var(--font-bungee);
+      user-select: none;
+      animation: lockedBounce 1.8s infinite ease-in-out;
+    }
+
+    @keyframes lockedBounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+    }
+
+    .arcade-type-badge {
+      margin-top: 14px;
+      background: var(--yellow);
+      border: 3px solid #000000;
+      border-radius: 6px;
+      padding: 4px 14px;
+      font-family: var(--font-title);
+      font-weight: 900;
+      font-size: 0.95rem;
+      color: #000000;
+      box-shadow: 3px 3px 0px #000000;
+      transform: rotate(-1.5deg);
+    }
+
+    /* 右側資料詳情 */
+    .arcade-info-col {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      color: #000000;
+    }
+
+    .info-header {
+      margin-bottom: 12px;
+    }
+
+    .info-tags-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 8px;
+    }
+
+    .info-tag {
+      font-size: 0.8rem;
+      font-weight: 900;
+      padding: 2px 8px;
+      border-radius: 4px;
+      border: 2px solid #000000;
+      background: #eeeeee;
+      box-shadow: 1.5px 1.5px 0px #000000;
+    }
+
+    .info-tag.tag-primary {
+      background: var(--blue);
+      color: #ffffff;
+    }
+
+    .info-tag.tag-secondary {
+      background: var(--purple);
+      color: #ffffff;
+    }
+
+    .info-tag.tag-locked {
+      background: #777777;
+      color: #ffffff;
+    }
+
+    .info-char-name {
+      font-family: var(--font-title);
+      font-size: clamp(1.8rem, 3.8vw, 2.3rem);
+      font-weight: 900;
+      color: #000000;
+      line-height: 1.15;
+      margin-bottom: 4px;
+      text-shadow: 2px 2px 0px rgba(0, 0, 0, 0.1);
+    }
+
+    .info-char-sub {
+      font-size: 0.95rem;
+      color: #555555;
+      font-weight: 700;
+    }
+
+    /* 對白引言框 */
+    .info-quote-box {
+      background: #fdfbef;
+      border: 3px solid #000000;
+      border-radius: 10px;
+      padding: 12px 16px;
+      margin: 14px 0;
+      position: relative;
+      box-shadow: 3px 3px 0px #000000;
+    }
+
+    .info-quote-box::before {
+      content: "“";
+      font-family: var(--font-title);
+      font-size: 2.2rem;
+      position: absolute;
+      top: -12px;
+      left: 8px;
+      color: var(--yellow);
+      -webkit-text-stroke: 1.5px #000000;
+      line-height: 1;
+    }
+
+    .info-lines-list {
+      list-style: none;
+      padding-left: 10px;
+    }
+
+    .info-lines-list li {
+      font-size: 0.92rem;
+      font-weight: 700;
+      line-height: 1.6;
+      color: #222222;
+      margin-bottom: 4px;
+    }
+
+    .info-lines-list li:last-child {
+      margin-bottom: 0;
+    }
+
+    /* 趣味能力條 (Stat Bars) */
+    .info-stats-block {
+      margin-top: 10px;
+      background: #f5f5f5;
+      border: 2.5px solid #000000;
+      border-radius: 8px;
+      padding: 10px 14px;
+    }
+
+    .stats-title {
+      font-family: var(--font-bungee);
+      font-size: 0.82rem;
+      letter-spacing: 0.05em;
+      color: #555555;
+      margin-bottom: 6px;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .stat-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 6px;
+    }
+
+    .stat-row:last-child {
+      margin-bottom: 0;
+    }
+
+    .stat-label {
+      font-size: 0.85rem;
+      font-weight: 900;
+      width: 75px;
+      flex-shrink: 0;
+      color: #222222;
+    }
+
+    .stat-bar-track {
+      flex: 1;
+      height: 14px;
+      background: #e0e0e0;
+      border: 2px solid #000000;
+      border-radius: 7px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .stat-bar-fill {
+      height: 100%;
+      background: repeating-linear-gradient(
+        -45deg,
+        var(--yellow),
+        var(--yellow) 6px,
+        #f5be00 6px,
+        #f5be00 12px
+      );
+      width: 0%;
+      transition: width 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+      border-right: 2px solid #000000;
+    }
+
+    .stat-value {
+      font-family: var(--font-bungee);
+      font-size: 0.8rem;
+      width: 35px;
+      text-align: right;
+    }
+
+    /* 下方選角軌道 (Roster Dock) */
+    .arcade-roster-dock {
+      background: #000000;
+      border: 4.5px solid #000000;
+      border-radius: 14px;
+      padding: 14px;
+      box-shadow: 6px 6px 0px rgba(0, 0, 0, 0.4);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .nav-arrow-btn {
+      background: var(--yellow);
+      border: 3px solid #000000;
+      width: 44px;
+      height: 64px;
+      border-radius: 8px;
+      font-family: var(--font-bungee);
+      font-size: 1.2rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 2px 2px 0px rgba(255, 255, 255, 0.3);
+      transition: transform 0.15s ease, background-color 0.15s ease;
+      flex-shrink: 0;
+    }
+
+    .nav-arrow-btn:hover {
+      background: #ffffff;
+      transform: scale(1.05);
+    }
+
+    .nav-arrow-btn:active {
+      transform: scale(0.95);
+    }
+
+    .roster-slots-track {
+      flex: 1;
+      display: flex;
+      gap: 12px;
+      overflow-x: auto;
+      padding: 6px 4px 10px;
+      scroll-behavior: smooth;
+    }
+
+    /* 自訂平滑滾動條 */
+    .roster-slots-track::-webkit-scrollbar {
+      height: 6px;
+    }
+    .roster-slots-track::-webkit-scrollbar-thumb {
+      background: #444444;
+      border-radius: 3px;
+    }
+
+    .roster-slot-card {
+      width: 82px;
+      height: 94px;
+      background: #2b2b36;
+      border: 3.5px solid #555566;
+      border-radius: 10px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      position: relative;
+      flex-shrink: 0;
+      transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1),
+                  border-color 0.2s ease,
+                  box-shadow 0.2s ease,
+                  background-color 0.2s ease;
+      user-select: none;
+    }
+
+    .roster-slot-card:hover {
+      transform: translateY(-4px);
+      border-color: #ffffff;
+      background: #383846;
+    }
+
+    .roster-slot-card.active {
+      transform: translateY(-8px) scale(1.05);
+      border-color: var(--yellow);
+      background: #ffffff;
+      box-shadow: 0 0 0 3px #000000, 0 8px 0px #000000;
+      z-index: 5;
+    }
+
+    .roster-slot-card.active::before {
+      content: "▼ 1P";
+      position: absolute;
+      top: -24px;
+      background: var(--yellow);
+      color: #000000;
+      font-family: var(--font-bungee);
+      font-size: 0.65rem;
+      padding: 2px 6px;
+      border: 2px solid #000000;
+      border-radius: 4px;
+      box-shadow: 2px 2px 0px #000000;
+      animation: selectArrow 0.6s infinite alternate ease-in-out;
+    }
+
+    @keyframes selectArrow {
+      0% { transform: translateY(0); }
+      100% { transform: translateY(-3px); }
+    }
+
+    .roster-slot-card.locked {
+      opacity: 0.65;
+      background: #1a1a24;
+      border-style: dashed;
+    }
+
+    .slot-thumb {
+      width: 48px;
+      height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .slot-thumb img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+    }
+
+    .slot-locked-icon {
+      font-size: 1.5rem;
+      color: #777788;
+      font-weight: 900;
+    }
+
+    .slot-name {
+      font-family: var(--font-title);
+      font-size: 0.75rem;
+      font-weight: 900;
+      margin-top: 4px;
+      color: #cccccc;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 70px;
+      text-align: center;
+    }
+
+    .roster-slot-card.active .slot-name {
+      color: #000000;
+    }
+
+    /* 底部備註 */
+    .arcade-footer {
+      margin-top: 18px;
+      text-align: center;
+      font-family: var(--font-title);
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #111111;
+      background: rgba(255, 255, 255, 0.85);
+      border: 3px solid #000000;
+      border-radius: 8px;
+      padding: 8px 16px;
+      box-shadow: 3px 3px 0px #000000;
+      display: inline-block;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="demo-container">
+    <header class="demo-header">
+      <div>
+        <span class="demo-badge">PROTOTYPE DEMO</span>
+        <h1 class="demo-title">方案 1：遊戲街機選角模式</h1>
+      </div>
+      <div class="demo-hint">
+        💡 鍵盤 <kbd>◀</kbd> <kbd>▶</kbd> 或點擊下方頭像可切換角色
+      </div>
+    </header>
+
+    <!-- 街機機台主區塊 -->
+    <main class="arcade-cabinet">
+      <!-- 頂部控制與狀態條 -->
+      <div class="arcade-top-bar">
+        <div class="arcade-player-tag">
+          <span class="pulse-dot"></span>
+          <span>1P // SELECT YOUR CHARACTER</span>
+        </div>
+        <div class="arcade-slot-counter" id="slotCounter">
+          01 / 06
+        </div>
+      </div>
+
+      <!-- 角色核心舞台 -->
+      <section class="arcade-stage" id="arcadeStage">
+        <!-- 左欄：大插畫外框 -->
+        <div class="arcade-visual-col">
+          <div class="arcade-visual-box" id="visualBox">
+            <img src="assets/海豚君.webp" alt="海豚君" class="arcade-char-img" id="charImg">
+            <div class="locked-silhouette" id="lockedIcon" style="display: none;">?</div>
+          </div>
+          <div class="arcade-type-badge" id="charTypeBadge">
+            海豚君家族 · 象徵始祖
+          </div>
+        </div>
+
+        <!-- 右欄：角色資訊與能力數據 -->
+        <div class="arcade-info-col">
+          <div class="info-header">
+            <div class="info-tags-row" id="tagsRow">
+              <span class="info-tag tag-primary">NO. 01</span>
+              <span class="info-tag tag-secondary">娃娃實體原型</span>
+              <span class="info-tag">遠雄海洋公園</span>
+            </div>
+            <h2 class="info-char-name" id="charName">海豚君</h2>
+            <p class="info-char-sub" id="charSub">海豚君科海豚君屬海豚君種</p>
+          </div>
+
+          <!-- 對白/故事手帳 -->
+          <div class="info-quote-box">
+            <ul class="info-lines-list" id="charLines">
+              <li>海豚君是我人生中第一隻角色！源自於遠雄海洋公園的一隻娃娃，至今差不多十年了。</li>
+              <li>我不愛海豚，我只愛海豚君。</li>
+              <li>請不要說海豚君是魚，是刺蝟，是沙丁魚，我會不開心：（</li>
+            </ul>
+          </div>
+
+          <!-- 趣味能力指數 -->
+          <div class="info-stats-block">
+            <div class="stats-title">
+              <span>CHARACTER STATS // 屬性觀測</span>
+              <span id="statsRatio">LEVEL MAX</span>
+            </div>
+            <div class="stat-row">
+              <span class="stat-label" id="stat1Label">象徵指數</span>
+              <div class="stat-bar-track">
+                <div class="stat-bar-fill" id="stat1Fill" style="width: 100%;"></div>
+              </div>
+              <span class="stat-value" id="stat1Val">100%</span>
+            </div>
+            <div class="stat-row">
+              <span class="stat-label" id="stat2Label">圓滾氣場</span>
+              <div class="stat-bar-track">
+                <div class="stat-bar-fill" id="stat2Fill" style="width: 90%;"></div>
+              </div>
+              <span class="stat-value" id="stat2Val">90%</span>
+            </div>
+            <div class="stat-row">
+              <span class="stat-label" id="stat3Label">刺刺程度</span>
+              <div class="stat-bar-track">
+                <div class="stat-bar-fill" id="stat3Fill" style="width: 0%;"></div>
+              </div>
+              <span class="stat-value" id="stat3Val">0%</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 下方選角軌道列 (Roster Dock) -->
+      <nav class="arcade-roster-dock" aria-label="角色選擇清單">
+        <button class="nav-arrow-btn" id="btnPrev" type="button" aria-label="上一隻角色">◀</button>
+        <div class="roster-slots-track" id="slotsTrack">
+          <!-- 透過 JS 動態產生各槽位 -->
+        </div>
+        <button class="nav-arrow-btn" id="btnNext" type="button" aria-label="下一隻角色">▶</button>
+      </nav>
+
+      <div style="text-align: center; margin-top: 18px;">
+        <div class="arcade-footer">
+          ✨ 未來只要在清單加入新角色設定，選角列就會自動橫向延伸，不會破壞頁面結構！
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    // 角色資料庫（包含現有 4 隻 + 2 個未來槽位示範）
+    const CHARACTERS = [
+      {
+        id: '01',
+        name: '海豚君',
+        subtitle: '海豚君科海豚君屬海豚君種',
+        typeBadge: '海豚君家族 · 象徵始祖',
+        tags: [
+          { text: 'NO. 01', type: 'tag-primary' },
+          { text: '娃娃實體原型', type: 'tag-secondary' },
+          { text: '遠雄海洋公園' }
+        ],
+        image: 'assets/海豚君.webp',
+        isLocked: false,
+        lines: [
+          '海豚君是我人生中第一隻角色！源自遠雄海洋公園的一隻娃娃，至今差不多十年了。',
+          '我不愛海豚，我只愛海豚君。',
+          '請不要說海豚君是魚、是刺蝟、是沙丁魚，我會不開心：（'
+        ],
+        stats: [
+          { label: '象徵指數', val: 100 },
+          { label: '圓滾氣場', val: 90 },
+          { label: '刺刺程度', val: 0 }
+        ]
+      },
+      {
+        id: '02',
+        name: '鯨魚君',
+        subtitle: '明黃色神秘球體海獸',
+        typeBadge: '海豚君家族 · 重量擔當',
+        tags: [
+          { text: 'NO. 02', type: 'tag-primary' },
+          { text: '娃娃實體原型', type: 'tag-secondary' },
+          { text: '超重球體' }
+        ],
+        image: 'assets/鯨魚君.webp',
+        isLocked: false,
+        lines: [
+          '黃色的鯨魚，沒見過吧？',
+          '有人覺得他很像一顆球。',
+          '但他其實非常重！四小隻彼此都是好朋友 :D'
+        ],
+        stats: [
+          { label: '重量噸位', val: 99 },
+          { label: '球體程度', val: 95 },
+          { label: '刺刺程度', val: 0 }
+        ]
+      },
+      {
+        id: '03',
+        name: '小海君',
+        subtitle: '海豚君身旁的身世之謎夥伴',
+        typeBadge: '海豚君家族 · 最佳拍檔',
+        tags: [
+          { text: 'NO. 03', type: 'tag-primary' },
+          { text: '娃娃實體原型', type: 'tag-secondary' },
+          { text: '斑點特徵' }
+        ],
+        image: 'assets/小海君.webp',
+        isLocked: false,
+        lines: [
+          '常常和海豚君一起行動，形影不離。',
+          '但至今沒有人知道兩隻究竟是什麼關係。',
+          '嘴巴比較長、身上有斑點、尾巴構造也不一樣！'
+        ],
+        stats: [
+          { label: '神秘身份', val: 88 },
+          { label: '夥伴默契', val: 96 },
+          { label: '斑點數量', val: 85 }
+        ]
+      },
+      {
+        id: '04',
+        name: '翻河君',
+        subtitle: '翻車魚 × 河豚 混血奇異體',
+        typeBadge: '海豚君家族 · 虛擬特化種',
+        tags: [
+          { text: 'NO. 04', type: 'tag-primary' },
+          { text: '無實體娃娃', type: 'tag-secondary' },
+          { text: '危險刺刺' }
+        ],
+        image: 'assets/翻河君.webp',
+        isLocked: false,
+        lines: [
+          '翻車魚和河豚的合體！',
+          '四小隻中唯一沒有實體娃娃的純原創角色。',
+          '全身刺刺的，請小心觸碰。'
+        ],
+        stats: [
+          { label: '刺刺程度', val: 100 },
+          { label: '混血稀有度', val: 98 },
+          { label: '實體存在', val: 0 }
+        ]
+      },
+      {
+        id: '05',
+        name: '？？？ (未公開)',
+        subtitle: '機密新企劃角色 A',
+        typeBadge: '未來擴充 · 設計孵化中',
+        tags: [
+          { text: 'NO. 05', type: 'tag-locked' },
+          { text: 'LOCKED', type: 'tag-locked' },
+          { text: '草稿階段' }
+        ],
+        image: '',
+        isLocked: true,
+        lines: [
+          '此角色草稿與骨架正在繪製中...',
+          '未來只要完成立繪，直接補入設定資料即可自動解鎖登場！',
+          '敬請期待日後更新（Token 補滿後解鎖）！'
+        ],
+        stats: [
+          { label: '機密指數', val: 100 },
+          { label: '期待程度', val: 99 },
+          { label: 'Token 消耗', val: 0 }
+        ]
+      },
+      {
+        id: '06',
+        name: '？？？ (神秘客串)',
+        subtitle: '特別篇 / 番外企劃角色',
+        typeBadge: '未來擴充 · 構思階段',
+        tags: [
+          { text: 'NO. 06', type: 'tag-locked' },
+          { text: 'LOCKED', type: 'tag-locked' },
+          { text: '概念案' }
+        ],
+        image: '',
+        isLocked: true,
+        lines: [
+          '仍在手帳邊緣塗鴉沉睡中...',
+          '據說與翻河君有著某種神秘的海洋關聯？',
+          '隨時準備加入角色宇宙！'
+        ],
+        stats: [
+          { label: '神秘色彩', val: 99 },
+          { label: '腦洞程度', val: 100 },
+          { label: '實體化率', val: 45 }
+        ]
+      }
+    ];
+
+    let currentIndex = 0;
+
+    // DOM 元件
+    const slotCounter = document.getElementById('slotCounter');
+    const visualBox = document.getElementById('visualBox');
+    const charImg = document.getElementById('charImg');
+    const lockedIcon = document.getElementById('lockedIcon');
+    const charTypeBadge = document.getElementById('charTypeBadge');
+    const tagsRow = document.getElementById('tagsRow');
+    const charName = document.getElementById('charName');
+    const charSub = document.getElementById('charSub');
+    const charLines = document.getElementById('charLines');
+    const slotsTrack = document.getElementById('slotsTrack');
+    const btnPrev = document.getElementById('btnPrev');
+    const btnNext = document.getElementById('btnNext');
+
+    // 能力值元素
+    const stat1Label = document.getElementById('stat1Label');
+    const stat1Fill = document.getElementById('stat1Fill');
+    const stat1Val = document.getElementById('stat1Val');
+    const stat2Label = document.getElementById('stat2Label');
+    const stat2Fill = document.getElementById('stat2Fill');
+    const stat2Val = document.getElementById('stat2Val');
+    const stat3Label = document.getElementById('stat3Label');
+    const stat3Fill = document.getElementById('stat3Fill');
+    const stat3Val = document.getElementById('stat3Val');
+
+    // 建立下方槽位
+    function initSlots() {
+      slotsTrack.innerHTML = '';
+      CHARACTERS.forEach((char, idx) => {
+        const slot = document.createElement('div');
+        slot.className = `roster-slot-card ${idx === 0 ? 'active' : ''} ${char.isLocked ? 'locked' : ''}`;
+        slot.setAttribute('data-index', idx);
+        slot.setAttribute('role', 'button');
+        slot.setAttribute('tabindex', '0');
+        slot.setAttribute('aria-label', `選擇 ${char.name}`);
+
+        if (char.isLocked) {
+          slot.innerHTML = `
+            <div class="slot-thumb">
+              <span class="slot-locked-icon">?</span>
+            </div>
+            <span class="slot-name">#${char.id} LOCKED</span>
+          `;
+        } else {
+          slot.innerHTML = `
+            <div class="slot-thumb">
+              <img src="${char.image}" alt="${char.name}">
+            </div>
+            <span class="slot-name">${char.name}</span>
+          `;
+        }
+
+        slot.addEventListener('click', () => selectCharacter(idx));
+        slot.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            selectCharacter(idx);
+          }
+        });
+        slotsTrack.appendChild(slot);
+      });
+    }
+
+    // 切換選中角色
+    function selectCharacter(index) {
+      if (index < 0) index = CHARACTERS.length - 1;
+      if (index >= CHARACTERS.length) index = 0;
+      currentIndex = index;
+
+      const char = CHARACTERS[currentIndex];
+
+      // 更新計數器
+      slotCounter.textContent = `${char.id} / 0${CHARACTERS.length}`;
+
+      // 觸發視覺動態
+      visualBox.classList.add('switching');
+
+      setTimeout(() => {
+        if (char.isLocked) {
+          charImg.style.display = 'none';
+          lockedIcon.style.display = 'block';
+        } else {
+          charImg.src = char.image;
+          charImg.alt = char.name;
+          charImg.style.display = 'block';
+          lockedIcon.style.display = 'none';
+        }
+
+        charTypeBadge.textContent = char.typeBadge;
+        charName.textContent = char.name;
+        charSub.textContent = char.subtitle;
+
+        // 更新標籤列
+        tagsRow.innerHTML = char.tags.map(t => `<span class="info-tag ${t.type || ''}">${t.text}</span>`).join('');
+
+        // 更新台詞/說明
+        charLines.innerHTML = char.lines.map(line => `<li>${line}</li>`).join('');
+
+        // 更新能力條
+        const [s1, s2, s3] = char.stats;
+        stat1Label.textContent = s1.label;
+        stat1Val.textContent = `${s1.val}%`;
+        stat1Fill.style.width = `${s1.val}%`;
+
+        stat2Label.textContent = s2.label;
+        stat2Val.textContent = `${s2.val}%`;
+        stat2Fill.style.width = `${s2.val}%`;
+
+        stat3Label.textContent = s3.label;
+        stat3Val.textContent = `${s3.val}%`;
+        stat3Fill.style.width = `${s3.val}%`;
+
+        visualBox.classList.remove('switching');
+        visualBox.classList.add('popping');
+        setTimeout(() => visualBox.classList.remove('popping'), 250);
+      }, 140);
+
+      // 更新下方槽位 active 樣式與水平居中捲動
+      const slotElements = slotsTrack.querySelectorAll('.roster-slot-card');
+      slotElements.forEach((el, idx) => {
+        if (idx === currentIndex) {
+          el.classList.add('active');
+          el.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+        } else {
+          el.classList.remove('active');
+        }
+      });
+    }
+
+    // 按鈕與鍵盤監聽
+    btnPrev.addEventListener('click', () => selectCharacter(currentIndex - 1));
+    btnNext.addEventListener('click', () => selectCharacter(currentIndex + 1));
+
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowLeft') {
+        selectCharacter(currentIndex - 1);
+      } else if (e.key === 'ArrowRight') {
+        selectCharacter(currentIndex + 1);
+      }
+    });
+
+    // 初始化
+    initSlots();
+    selectCharacter(0);
+  </script>
+</body>
+
+</html>
